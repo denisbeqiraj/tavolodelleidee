@@ -18,17 +18,19 @@ r = sr.Recognizer()
 
 r = sr.Recognizer()
 mic = sr.Microphone(device_index=0)
-async def echo(websocket):
-    while True:
-        with mic as source:
-            audio = r.record(source, duration=5)
-        text_send=""
-        try:
-            text_send = r.recognize_google(audio, language="it-IT")
-        except:
-            text_send = ""
 
-        await websocket.send(text_send)
+
+async def echo(websocket):
+    async for message in websocket:
+        with mic as source:
+            audio = r.record(source, duration=10)
+            text_send=""
+            try:
+                text_send = r.recognize_google(audio, language="it-IT")
+            except:
+                text_send = ""
+            await websocket.send(text_send)
+
 
 start_server = websockets.serve(echo, "localhost", 8765)
 
