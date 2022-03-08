@@ -15,8 +15,9 @@ socket.addEventListener('message', function (event) {
     elementimage.insertAdjacentHTML('beforeend', '<div id="two">two</div>');
     fetch(url)
         .then(response => {
-            var resp=response.json();
-            console.log(resp["hits"]);
+            return response.json();
+        }).then(data => {
+            console.log(data["hits"][0]["largeImageURL"]);
         })
         .catch(error => {
             // handle the error
