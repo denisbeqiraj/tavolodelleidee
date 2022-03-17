@@ -43,7 +43,10 @@ def keyword_founder(audio_string):
     for word in doc:
         if word.pos_ != 'NOUN':
             keywords.remove(word.text)
-    return keywords
+    word_send = ""
+    for k in keywords:
+        word_send = word_send + k + ","
+    return word_send
 
 
 r = sr.Recognizer()
