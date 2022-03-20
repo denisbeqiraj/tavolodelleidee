@@ -1,30 +1,30 @@
-import requests;
-import re;
-import json;
-import time;
-import logging;
+import requests
+import re
+import json
+import time
+import logging
 
-logging.basicConfig(level=logging.DEBUG);
+
 logger = logging.getLogger(__name__)
 
 def search(keywords, max_results=None):
-    url = 'https://duckduckgo.com/';
+    url = 'https://duckduckgo.com/'
     params = {
     	'q': keywords
-    };
+    }
 
-    logger.debug("Hitting DuckDuckGo for Token");
+
 
     #   First make a request to above URL, and parse out the 'vqd'
     #   This is a special token, which should be used in the subsequent request
     res = requests.post(url, data=params)
-    searchObj = re.search(r'vqd=([\d-]+)\&', res.text, re.M|re.I);
+    searchObj = re.search(r'vqd=([\d-]+)\&', res.text, re.M|re.I)
 
     if not searchObj:
-        logger.error("Token Parsing Failed !");
-        return -1;
+        logger.error("Token Parsing Failed !")
+        return -1
 
-    logger.debug("Obtained Token");
+
 
     headers = {
         'authority': 'duckduckgo.com',
@@ -48,7 +48,7 @@ def search(keywords, max_results=None):
         ('v7exp', 'a'),
     )
 
-    requestUrl = url + "i.js";
+    requestUrl = url + "i.js"
 
     data_receive = []
     while True:
@@ -62,7 +62,5 @@ def search(keywords, max_results=None):
 
     objs = data["results"]
     for obj in objs:
-        data_receive.append(obj["image"]);
+        data_receive.append(obj["image"])
     return data_receive
-
-search("audi q6");

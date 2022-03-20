@@ -13,16 +13,7 @@ socket.addEventListener('message', function (event) {
     socket.send('Received');
     var split_word=event.data.split(",")
     if(split_word.length != 1){
-        var url = "https://pixabay.com/api/?key="+API_KEY+"&q="+encodeURIComponent(split_word[0]);
-        console.log(url);
-        fetch(url)
-        .then(response => {
-            return response.json();
-        }).then(data => {
-            console.log(data["hits"][0]["largeImageURL"]);
-        })
-        .catch(error => {
-            // handle the error
-        });
+        console.log(split_word);
+        move(split_word[0])
     }
 });
