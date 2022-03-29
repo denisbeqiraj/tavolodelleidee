@@ -117,8 +117,13 @@ def keyword_founder(audio_string):
     if len(search_word) >= 4:
         for k in search_word[:4]:
             word_send = word_send + k + ","
-
-    return word_send
+    data = {
+        "all_data": {
+            "word": keywords,
+            "link": search_word[:4]
+        }
+    }
+    return data
 
 
 r = sr.Recognizer()
@@ -134,8 +139,9 @@ async def echo(websocket):
                 text_send = r.recognize_google(audio, language="it-IT")
             except:
                 text_send = ""
+            print(text_send)
             keyword = keyword_founder(text_send)
-            await websocket.send(keyword)
+            await websocket.send(json.dumps(keyword))
 
 
 start_server = websockets.serve(echo, "localhost", 8765)
