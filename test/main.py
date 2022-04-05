@@ -8,7 +8,7 @@ import re
 import json
 import time
 import logging
-from flask import Flask, render_template
+from flask import Flask, render_template,request
 from flask_socketio import SocketIO, emit, send
 
 app = Flask(__name__)
@@ -18,6 +18,7 @@ socketio = SocketIO(app, cors_allowed_origins='*')
 logger = logging.getLogger(__name__)
 
 text_global = ""
+seconds = 10
 
 
 def search(keywords, max_results=None):
@@ -144,12 +145,19 @@ def settings():
     return render_template('settings.html')
 
 
+@app.route('/settings_parameters')
+def settings_parameters():
+    global seconds
+    seconds = int(request.args.get('seconds'))
+    return render_template('settings.html')
+
+
 @socketio.on('tavolodelleidee')
 def handleMessage(msg):
     global text_global
     while True:
         with mic as source:
-            audio = r.record(source, duration=10)
+            audio = r.record(source, duration=seconds)
             text_send = ""
             try:
                 text_send = r.recognize_google(audio, language="it-IT")
