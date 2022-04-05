@@ -17,6 +17,8 @@ socketio = SocketIO(app, cors_allowed_origins='*')
 
 logger = logging.getLogger(__name__)
 
+text_global = ""
+
 
 def search(keywords, max_results=None):
     url = 'https://duckduckgo.com/'
@@ -142,8 +144,9 @@ def settings():
     return render_template('settings.html')
 
 
-@socketio.on('my event')
+@socketio.on('tavolodelleidee')
 def handleMessage(msg):
+    global text_global
     while True:
         with mic as source:
             audio = r.record(source, duration=10)
@@ -154,6 +157,7 @@ def handleMessage(msg):
                 text_send = ""
             print(text_send)
             keyword = keyword_founder(text_send)
+            text_global = json.dumps(keyword)
             emit("response", json.dumps(keyword))
 
 
