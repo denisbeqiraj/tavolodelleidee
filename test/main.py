@@ -8,7 +8,7 @@ import re
 import json
 import time
 import logging
-from flask import Flask, render_template,request
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, send
 
 app = Flask(__name__)
@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 text_global = ""
 seconds = 10
+all_texts = []
+all_images = []
 
 
 def search(keywords, max_results=None):
@@ -152,9 +154,17 @@ def settings_parameters():
     return render_template('settings.html')
 
 
+@app.route('/save')
+def save():
+    global all_texts
+    return render_template('save.html',data=zip(all_texts,all_images))
+
+
 @socketio.on('tavolodelleidee')
 def handleMessage(msg):
     global text_global
+    global all_texts
+    global all_images
     while True:
         with mic as source:
             audio = r.record(source, duration=seconds)
@@ -165,7 +175,11 @@ def handleMessage(msg):
                 text_send = ""
             print(text_send)
             keyword = keyword_founder(text_send)
-            text_global = json.dumps(keyword)
+            if len(keyword["all_data"]["word"]) > 0 and len(keyword["all_data"]["link"]) > 0:
+                text_global = keyword["all_data"]["word"][0]
+                all_texts.append(keyword["all_data"]["word"][0])
+                all_images.append(keyword["all_data"]["link"][0])
+
             emit("response", json.dumps(keyword))
 
 
