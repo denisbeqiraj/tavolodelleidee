@@ -4,27 +4,23 @@ import json
 import time
 import logging
 
-
 logger = logging.getLogger(__name__)
+
 
 def search(keywords, max_results=None):
     url = 'https://duckduckgo.com/'
     params = {
-    	'q': keywords
+        'q': keywords
     }
-
-
 
     #   First make a request to above URL, and parse out the 'vqd'
     #   This is a special token, which should be used in the subsequent request
     res = requests.post(url, data=params)
-    searchObj = re.search(r'vqd=([\d-]+)\&', res.text, re.M|re.I)
+    searchObj = re.search(r'vqd=([\d-]+)\&', res.text, re.M | re.I)
 
     if not searchObj:
         logger.error("Token Parsing Failed !")
         return -1
-
-
 
     headers = {
         'authority': 'duckduckgo.com',

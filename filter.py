@@ -4,9 +4,9 @@ import spacy
 nlp = spacy.load("it_core_news_lg")
 
 kw_extractor = yake.KeywordExtractor()
-audio_string = "Cerchiamo sempre soluzioni innovative per ridurre il nostro impatto ambientale. I nostri negozi, " \
-               "uffici, data center e centri logistici sono già a impatto zero. Ed entro il 2030 lo saranno anche i " \
-               "nostri prodotti e il loro utilizzo. "
+audio_string = "Viviamo in un piccolo paese di campagna, in una bella casa con un cortile. I nostri tre figli si " \
+               "chiamano Andrea, Martina e Giacomo. Andrea frequenta l'asilo, Martina e Giacomo frequentano le scuole " \
+               "elementari. I miei tre figli amano giocare a tanti giochi diversi nel cortile. "
 language = "it"
 max_ngram_size = 2
 deduplication_threshold = 0.3
@@ -18,6 +18,7 @@ keywords_and_score = custom_kw_extractor.extract_keywords(audio_string)
 keywords = []
 for kw in keywords_and_score:
     keywords.append(kw[0])
+    print(kw[0])
 
 sentence = ""
 for word in keywords:

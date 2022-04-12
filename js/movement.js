@@ -1,8 +1,8 @@
-function move(image){
+function move(images){
 
     const el = document.querySelector("#box");
     const imm = document.querySelector('#img');
-    imm.src=image;
+    imm.src=images;
 
     //el.style.height = innerHeight/4 + "px";
     //el.style.width = innerWidth/4 + "px";
@@ -17,7 +17,7 @@ function move(image){
     //alert(innerHeight); 577
 
     var timings = {
-        duration: 2000
+        duration: 1500
     };
 
     var keyframes = [
@@ -26,13 +26,13 @@ function move(image){
             opacity: 0
         },
         {
-            transform: 'rotate(360deg) scale(100%,100%)',
+            transform: 'rotate(720deg) scale(70%,70%)',
             opacity: 1
         }
     ];
 
     var timings2 = {
-        duration: 18000,
+        duration: 12000,
         fill: 'both'
     };
 
