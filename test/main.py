@@ -171,6 +171,7 @@ def handleMessage(msg):
     global all_images
     global current_image
     while True:
+
         with mic as source:
             audio = r.record(source, duration=seconds)
             text_send = ""
