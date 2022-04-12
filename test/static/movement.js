@@ -1,13 +1,22 @@
-function move(images){
+function move(images, word){
 
-    const el = document.querySelector("#box");
-    const imm = document.querySelector('#img');
-    imm.src=images;
+    //const el = document.querySelector("#box");
+    const imm = document.querySelector('#img1');
+    imm.src=images[0];
+    imm = document.querySelector('#img2');
+    imm.src=images[1];
+    imm = document.querySelector('#img3');
+    imm.src=images[2];
+    imm = document.querySelector('#img4');
+    imm.src=images[3];
+
+    const key = document.querySelector('#word');
+
 
     //el.style.height = innerHeight/4 + "px";
     //el.style.width = innerWidth/4 + "px";
 
-    //In questo modo l'immagine ha un limite di altezza che dipende dall'altezza del div box
+    /*In questo modo l'immagine ha un limite di altezza che dipende dall'altezza del div box
     if(imm.naturalHeight > el.clientHeight){
         imm.style.height = el.clientHeight + "px";
     }
@@ -55,6 +64,6 @@ function move(images){
     console.log()
 
     document.timeline.play(sequence);
-
+*/
 
 };
