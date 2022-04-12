@@ -11,9 +11,9 @@ socket.addEventListener('open', function (event) {
 socket.addEventListener('message', function (event) {
     console.log('Message from server ', event.data);
     socket.send('Received');
-    var split_word=event.data.split(",")
-    if(split_word.length != 1){
-        console.log(split_word);
-        move(split_word[0])
+    const split_word=JSON.parse(event.data);
+    console.log(split_word["all_data"]);
+    if(split_word["all_data"]["link"].length>0){
+        move(split_word["all_data"]["link"][0]);
     }
 });

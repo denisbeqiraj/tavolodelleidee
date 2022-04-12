@@ -8,11 +8,21 @@ import re
 import json
 import time
 import logging
-from flask import Flask, render_template
-from flask_socketio import SocketIO, emit
+from flask import Flask, render_template, request
+from flask_socketio import SocketIO, emit, send
+
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app, cors_allowed_origins='*')
 
 logger = logging.getLogger(__name__)
 
+text_global = ""
+seconds = 10
+all_texts = []
+all_images = []
+current_image = 0
 
 def search(keywords, max_results=None):
     url = 'https://duckduckgo.com/'
@@ -34,7 +44,7 @@ def search(keywords, max_results=None):
         'accept': 'application/json, text/javascript, */*; q=0.01',
         'sec-fetch-dest': 'empty',
         'x-requested-with': 'XMLHttpRequest',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
         'sec-fetch-site': 'same-origin',
         'sec-fetch-mode': 'cors',
         'referer': 'https://duckduckgo.com/',
@@ -107,7 +117,10 @@ def keyword_founder(audio_string):
     doc = nlp(sentence)
     for word in doc:
         if word.pos_ != 'NOUN':
-            keywords.remove(word.text)
+            try:
+                keywords.remove(word.text)
+            except:
+                print("")
     search_word = []
     if len(keywords) > 0:
         search_word = search(keywords[0])
@@ -128,10 +141,38 @@ r = sr.Recognizer()
 mic = sr.Microphone(device_index=0)
 
 
-async def echo(websocket):
-    async for message in websocket:
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
+
+
+@app.route('/settings_parameters')
+def settings_parameters():
+    global seconds
+    seconds = int(request.args.get('seconds'))
+    return render_template('settings.html')
+
+
+@app.route('/save')
+def save():
+    global all_texts
+    return render_template('save.html',data=zip(all_texts,all_images))
+
+
+@socketio.on('tavolodelleidee')
+def handleMessage(msg):
+    global text_global
+    global all_texts
+    global all_images
+    global current_image
+    while True:
         with mic as source:
-            audio = r.record(source, duration=10)
+            audio = r.record(source, duration=seconds)
             text_send = ""
             try:
                 text_send = r.recognize_google(audio, language="it-IT")
@@ -139,10 +180,17 @@ async def echo(websocket):
                 text_send = ""
             print(text_send)
             keyword = keyword_founder(text_send)
-            await websocket.send(json.dumps(keyword))
+            if len(keyword["all_data"]["word"]) > 0 and len(keyword["all_data"]["link"]) > 0:
+                text_global = keyword["all_data"]["word"][0]
+                if len(all_texts) < 12:
+                    all_texts.append(keyword["all_data"]["word"][0])
+                    all_images.append(keyword["all_data"]["link"][0])
+                else:
+                    all_texts[current_image]=keyword["all_data"]["word"][0]
+                    all_images[current_image]=keyword["all_data"]["link"][0]
+                    current_image=(current_image+1)%12
+
+            emit("response", json.dumps(keyword))
 
 
-start_server = websockets.serve(echo, "localhost", 8765)
-
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+socketio.run(app, port=2000)
