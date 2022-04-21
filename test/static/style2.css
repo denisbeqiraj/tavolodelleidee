@@ -1,6 +1,6 @@
 
 body{
-background-image: url('/background.png');
+background-image: url('background.png');
 }
 
 .scene {
@@ -17,7 +17,7 @@ background-image: url('/background.png');
   height: 200px;
   position: relative;
   transform-style: preserve-3d;
-  animation: giro360 10s;
+  animation: giro360 10s infinite;
 }
 
 @keyframes giro360 {
@@ -49,7 +49,6 @@ background-image: url('/background.png');
 }
 
 .box__face--front  {
-background-color: #a500ff;
 transform: rotateY(  0deg) translateZ(100px);
 }
 

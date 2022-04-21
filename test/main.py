@@ -125,20 +125,21 @@ def keyword_founder(audio_string):
     if len(keywords) > 0:
         search_word = search(keywords[0])
     word_send = ""
-    if len(search_word) >= 4:
-        for k in search_word[:4]:
+    image_number=5
+    if len(search_word) >= image_number:
+        for k in search_word[:image_number]:
             word_send = word_send + k + ","
     data = {
         "all_data": {
             "word": keywords,
-            "link": search_word[:4]
+            "link": search_word[:image_number]
         }
     }
     return data
 
 
 r = sr.Recognizer()
-mic = sr.Microphone(device_index=0)
+mic = sr.Microphone(device_index=1)
 
 
 @app.route('/')
@@ -171,9 +172,11 @@ def handleMessage(msg):
     global all_images
     global current_image
     while True:
-
         with mic as source:
-            audio = r.record(source, duration=seconds)
+            try:
+                audio = r.record(source, duration=seconds)
+            except:
+                print("ok")
             text_send = ""
             try:
                 text_send = r.recognize_google(audio, language="it-IT")
