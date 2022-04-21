@@ -11,7 +11,6 @@ import logging
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, send
 
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, cors_allowed_origins='*')
@@ -23,6 +22,7 @@ seconds = 10
 all_texts = []
 all_images = []
 current_image = 0
+
 
 def search(keywords, max_results=None):
     url = 'https://duckduckgo.com/'
@@ -125,7 +125,7 @@ def keyword_founder(audio_string):
     if len(keywords) > 0:
         search_word = search(keywords[0])
     word_send = ""
-    image_number=5
+    image_number = 5
     if len(search_word) >= image_number:
         for k in search_word[:image_number]:
             word_send = word_send + k + ","
@@ -162,7 +162,7 @@ def settings_parameters():
 @app.route('/save')
 def save():
     global all_texts
-    return render_template('save.html',data=zip(all_texts,all_images))
+    return render_template('save.html', data=zip(all_texts, all_images))
 
 
 @socketio.on('tavolodelleidee')
@@ -190,9 +190,9 @@ def handleMessage(msg):
                     all_texts.append(keyword["all_data"]["word"][0])
                     all_images.append(keyword["all_data"]["link"][0])
                 else:
-                    all_texts[current_image]=keyword["all_data"]["word"][0]
-                    all_images[current_image]=keyword["all_data"]["link"][0]
-                    current_image=(current_image+1)%12
+                    all_texts[current_image] = keyword["all_data"]["word"][0]
+                    all_images[current_image] = keyword["all_data"]["link"][0]
+                    current_image = (current_image + 1) % 12
 
             emit("response", json.dumps(keyword))
 
