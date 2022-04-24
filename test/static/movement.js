@@ -3,15 +3,16 @@ function move(images, word){
     //const el = document.querySelector("#box");
     const imm = document.querySelector('#img1');
     imm.src=images[0];
-    imm = document.querySelector('#img2');
-    imm.src=images[1];
-    imm = document.querySelector('#img3');
-    imm.src=images[2];
-    imm = document.querySelector('#img4');
-    imm.src=images[3];
-
-    const key = document.querySelector('#word');
-
+    const imm1 = document.querySelector('#img2');
+    imm1.src=images[1];
+    const imm2 = document.querySelector('#img3');
+    imm2.src=images[2];
+    const imm3 = document.querySelector('#img4');
+    imm3.src=images[3];
+    const imm4 = document.querySelector('#img5');
+    imm4.src=images[4];
+    const words = document.querySelector('#word');
+    words.textContent=word;
 
     //el.style.height = innerHeight/4 + "px";
     //el.style.width = innerWidth/4 + "px";
