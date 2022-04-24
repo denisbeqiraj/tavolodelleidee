@@ -1,0 +1,100 @@
+
+:root {
+--path: path("M 75 75 C 11 13 139 -87 231 11 C 294 88 215 233 -26 170 C -175 123 -212 53 -196 -17 C -175 -99 -17 -140 196 -135 C 263 -132 583 -142 584 55 C 581 310 309 284 62 284 C -22 281 -439 291 -448 23 V -502");
+}
+
+body{
+background-image: url('/background.png');
+}
+
+.scene {
+  height: 97vh;
+  width: 100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  perspective: 700px;
+}
+
+.box {
+  width: 150px;
+  height: 150px;
+  position: absolute;
+  transform-style: preserve-3d;
+  offset-path: var(--path);
+  offset-rotate: reverse;
+  animation: entrata 2s,
+             traiettoria 20s 2s linear,
+             giro360 18s 2s linear;
+}
+
+@keyframes traiettoria {
+    0% {offset-distance: 0%;}
+  100% {offset-distance: 100%;}
+}
+
+@keyframes giro360 {
+    0% { transform: rotateX(  0deg) rotateY(  0deg); }
+  100% { transform: rotateX(360deg) rotateY(720deg); }
+}
+
+@keyframes entrata {
+0%{transform: translateZ(-10000px) rotateX(  0deg) rotateY(  0deg);}
+100%{transform: translateZ(-75px) rotateX(360deg) rotateY(720deg);}
+}
+
+@keyframes giro {
+    0% { transform: rotateX(-45deg) rotateY(0deg); }
+    50% { transform: rotateX(45deg) rotateY(360deg); }
+    100% { transform: rotateX(-45deg) rotateY(720deg); }
+}
+
+.box__face {
+  position: absolute;
+  background: white;
+  width: 150px;
+  height: 150px;
+  border: 2px solid black;
+  opacity: 0.7;
+}
+
+.box__face--front  {
+  font-size: 25px;
+  font-weight: bold;
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  word-break: break-word;
+transform: rotateY(  0deg) translateZ(75px);
+}
+
+.text {
+font-size: 25px;
+  font-weight: bold;
+  color: black;
+  word-break: break-word;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.box__face--back   {
+transform: rotateY(180deg) translateZ(75px);
+}
+
+.box__face--right  {
+transform: rotateY( 90deg) translateZ(75px);
+}
+
+.box__face--left   {
+transform: rotateY(-90deg) translateZ(75px);
+}
+
+.box__face--top    {
+transform: rotateX( 90deg) translateZ(75px);
+}
+
+.box__face--bottom {
+transform: rotateX(-90deg) translateZ(75px);
+}
