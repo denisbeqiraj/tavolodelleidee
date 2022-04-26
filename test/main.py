@@ -22,6 +22,8 @@ seconds = 10
 all_texts = []
 all_images = []
 current_image = 0
+background = "background.png"
+backgrounds = ["background.png", "black.png", "white.png"]
 
 
 def search(keywords, max_results=None):
@@ -156,6 +158,9 @@ def settings():
 def settings_parameters():
     global seconds
     seconds = int(request.args.get('seconds'))
+    background = int(request.args.get('background'))
+    if background < 3 and background >= 0:
+        background = backgrounds[background]
     return render_template('settings.html')
 
 
@@ -197,4 +202,4 @@ def handleMessage(msg):
             emit("response", json.dumps(keyword))
 
 
-socketio.run(app, port=2000)
+socketio.run(app, port=80)
