@@ -24,15 +24,34 @@
       </div>
     </div>
   </div>
-  <form action="/settings_parameters?background=0" method="get">
-    <button type="submit" class="btn btn-primary">Wood</button>
-  </form>
-  <form action="" method="get">
-    <button type="submit" class="btn btn-primary">White</button>
-  </form>
-  <form action="" method="get">
-    <button type="submit" class="btn btn-primary">Black</button>
-  </form>
+  <div class="container">
+    <div class="row">
+      <div class="col">
+          <figure class="figure">
+            <img class="figure-img img-fluid rounded" style="width:400px;height:200px;background-color: brown;">
+            <form action="/settings_parameters" method="get">
+              <button type="submit" class="btn btn-primary" name="background" value="0">Wood</button>
+            </form>
+          </figure>
+      </div>
+      <div class="col">
+          <figure class="figure">
+            <img class="figure-img img-fluid rounded" style="width:400px;height:200px;background-color: white;">
+            <form action="/settings_parameters" method="get">
+              <button type="submit" class="btn btn-primary" name="background" value="1">White</button>
+            </form>
+          </figure>
+      </div>
+      <div class="col">
+          <figure class="figure">
+            <img class="figure-img img-fluid rounded" style="width:400px;height:200px;background-color: black;">
+            <form action="/settings_parameters" method="get">
+              <button type="submit" class="btn btn-primary" name="background" value="2">Black</button>
+            </form>
+          </figure>
+      </div>
+      </div>
+  </div>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

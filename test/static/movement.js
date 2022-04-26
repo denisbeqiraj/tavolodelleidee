@@ -1,13 +1,14 @@
 function move(images, word){
 
-    const img2 = document.querySelector('#img2');
+    const img2 = document.getElementById("img2");
+    console.log(img2);
     img2.addEventListener("error", myFunction());
 
     function myFunction() {
-        var text = document.createElement("div");
+        const text = document.createElement("div");
         text.className = "text";
         text.innerHTML = "Lavoro di semestre di Natalia Andaloro e Denis Beqiraj";
-        var parent = img2.parentNode;
+        const parent = img2.parentNode;
         parent.insertBefore(text,img2);
         parent.removeChild(img2);
     }
@@ -22,5 +23,7 @@ function move(images, word){
     img5.src=images[4];
     const words = document.querySelector('#word');
     words.textContent=word;
+    const box = document.querySelector("#box");
+    box.classList.add('animate');
 
-};
+}

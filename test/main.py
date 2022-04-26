@@ -146,7 +146,8 @@ mic = sr.Microphone(device_index=1)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    global background
+    return render_template('index.html',background_value="../static/"+background)
 
 
 @app.route('/settings')
@@ -157,10 +158,14 @@ def settings():
 @app.route('/settings_parameters')
 def settings_parameters():
     global seconds
-    seconds = int(request.args.get('seconds'))
+    try:
+        seconds = int(request.args.get('seconds'))
+    except:
+        print("error")
     background = int(request.args.get('background'))
-    if background < 3 and background >= 0:
+    if 3 > background >= 0:
         background = backgrounds[background]
+
     return render_template('settings.html')
 
 
