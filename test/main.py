@@ -1,6 +1,4 @@
 import speech_recognition as sr
-import asyncio
-import websockets
 import yake
 import spacy
 import requests
