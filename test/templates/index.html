@@ -2,35 +2,35 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Imaginator</title>
     <link rel="stylesheet" href="static/style2.css">
 </head>
 <body>
 <div class="scene">
-  <div class="box" id="box">
-    <div id="word" class="box__face box__face--front">
+  <div class="box animate" id="firstBox">
+    <div class="box__face box__face--front text">
         AA21-22, Bachelor <br>
         Ing. Info. <br>
         Prof. Lorenzo Sommaruga
     </div>
-    <div id="back" class="box__face box__face--back">
-        <img id="img2" src="" width="150px" height="150px">
+    <div class="box__face box__face--back text">
+        Lavoro di semestre di Natalia Andaloro e Denis Beqiraj
     </div>
     <div class="box__face box__face--right">
-         <img id="img3" src="../static/supsi_bianca.jfif" width="150px" height="150px">
+         <img src="../static/supsi_bianca.jfif" width="150px" height="150px">
     </div>
     <div class="box__face box__face--left">
-        <img id="img4" src="../static/StartUpGarage.png" width="150px" height="150px">
+        <img src="../static/StartUpGarage.png" width="150px" height="150px">
     </div>
     <div class="box__face box__face--top">
-        <img id="img1" src="../static/logo.png" width="150px" height="150px">
+        <img src="../static/logo.png" width="150px" height="150px">
     </div>
     <div class="box__face box__face--bottom">
-        <img id="img5" src="../static/logo.png" width="150px" height="150px">
+        <img src="../static/logo.png" width="150px" height="150px">
     </div>
   </div>
+    <div class="end"></div>
 </div>
-<div class="end"></div>
 <style>
     body{
         background-image: url({{ background_value }});
