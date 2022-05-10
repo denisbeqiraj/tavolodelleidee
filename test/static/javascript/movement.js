@@ -45,7 +45,7 @@ function move(images, word){
     img1.width = "150";
     img1.height = "150";
     img1.addEventListener("error", function(){
-        img1.src = "../static/supsi_bianca.jfif";
+        img1.src = "../static/image_logos/supsi_bianca.jfif";
     });
     right.appendChild(img1);
 
@@ -58,7 +58,7 @@ function move(images, word){
     img2.width = "150";
     img2.height = "150";
     img2.addEventListener("error", function(){
-        img2.src = "../static/StartUpGarage.png";
+        img2.src = "../static/image_logos/StartUpGarage.png";
     });
     left.appendChild(img2);
 
@@ -71,7 +71,7 @@ function move(images, word){
     img3.width = "150";
     img3.height = "150";
     img3.addEventListener("error", function(){
-        img3.src = "../static/logo.png";
+        img3.src = "../static/image_logos/logo.png";
     });
     top.appendChild(img3);
 
@@ -84,7 +84,7 @@ function move(images, word){
     img4.width = "150";
     img4.height = "150";
     img4.addEventListener("error", function(){
-        img4.src = "../static/logo.png";
+        img4.src = "../static/image_logos/logo.png";
     });
     bottom.appendChild(img4);
 

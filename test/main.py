@@ -20,8 +20,8 @@ seconds = 10
 all_texts = []
 all_images = []
 current_image = 0
-background = "background.png"
-backgrounds = ["background.png", "black.png", "white.png"]
+background = "wood.png"
+backgrounds = ["wood.png", "black.png", "white.png"]
 
 
 def search(keywords, max_results=None):
@@ -145,7 +145,7 @@ mic = sr.Microphone(device_index=1)
 @app.route('/')
 def index():
     global background
-    return render_template('index.html',background_value="../static/"+background)
+    return render_template('index.html', background_value="../static/image_background/" + background)
 
 
 @app.route('/settings')
@@ -160,7 +160,7 @@ def settings_parameters():
         seconds = int(request.args.get('seconds'))
     except:
         print("error")
-    background = int(request.args.get('background'))
+    background = int(request.args.get('image_background'))
     if 3 > background >= 0:
         background = backgrounds[background]
 
