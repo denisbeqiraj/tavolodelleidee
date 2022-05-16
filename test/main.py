@@ -10,9 +10,8 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, send
 
 app = Flask(__name__)
-context = ('cert.pfx', 'password.txt')  # certificate and key files
 
-socketio = SocketIO(app,context, cors_allowed_origins='*')
+socketio = SocketIO(app, cors_allowed_origins='*')
 
 logger = logging.getLogger(__name__)
 
@@ -206,4 +205,4 @@ def handleMessage(msg):
             emit("response", json.dumps(keyword))
 
 
-socketio.run(app, port=443)
+socketio.run(app, host="0.0.0.0", port="443", debug=True,ssl_context=('cert.pem','pkey.pem'))
