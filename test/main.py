@@ -93,34 +93,49 @@ r = sr.Recognizer()
             text_send = ""
 '''
 
+# inizializzazione delle variabili necessarie per utilizzare le librerie per il filtro
 nlp = spacy.load("it_core_news_lg")
 kw_extractor = yake.KeywordExtractor()
 language = "it"
-max_ngram_size = 2
-deduplication_threshold = 0.3
-numOfKeywords = 50
+max_ngram_size = 2 #numero massimo di parole per una parola chiave
+deduplication_threshold = 0.3 #una soglia di duplicazione delle parole nelle parole chiave trovate
+numOfKeywords = 50 #numero massimo di parole chiave trovabili
 custom_kw_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size, dedupLim=deduplication_threshold,
                                             top=numOfKeywords, features=None)
 
 
 def keyword_founder(audio_string):
     keywords_and_score = custom_kw_extractor.extract_keywords(audio_string)
+    #copia delle parole chiave trovate dalla libreria in una lista
     keywords = []
     for kw in keywords_and_score:
         keywords.append(kw[0])
 
+    #unisce le parole chiave singole in una stringa
+    #e le parole chiave doppie vengono salvate in una lista
     sentence = ""
+    sentence2 = []
     for word in keywords:
         if " " not in word:
             sentence += word + " "
+        else:
+            sentence2.append(word)
 
+    #le parole chiave doppie se contengono verbi vengono eliminate
+    for w in sentence2:
+        doc1 = nlp(w)
+        for w1 in doc1:
+            if w1.pos_ == 'VERB':
+                if w in keywords:
+                    keywords.remove(w)
+
+    #le parole chiave singole se non sono nomi vengono eliminate
     doc = nlp(sentence)
     for word in doc:
         if word.pos_ != 'NOUN':
-            try:
+            if word.text in keywords:
                 keywords.remove(word.text)
-            except:
-                print("")
+
     search_word = []
     if len(keywords) > 0:
         search_word = search(keywords[0])

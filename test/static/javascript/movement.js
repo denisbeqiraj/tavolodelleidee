@@ -1,4 +1,5 @@
 const firstBox = document.querySelector("#firstBox");
+//aggiunta dell'event listener che elimina il primo cubo
 firstBox.addEventListener("animationend", deleteBox);
 
 function deleteBox(){
@@ -7,11 +8,14 @@ function deleteBox(){
 
 function move(images, word){
 
+    //prende il nodo div scene contenitore
     const parent = document.querySelector(".scene");
 
+    //creazione del nuovo cubo con animazione
     const newBox = document.createElement("div");
     newBox.className = "box animate";
 
+    //creazione faccia front con parola chiave
     const front = document.createElement("div");
     front.className = "box__face box__face--front text";
     const wordNode = document.createTextNode(word);
@@ -19,6 +23,8 @@ function move(images, word){
 
     newBox.appendChild(front);
 
+    //creazione faccia back con la prima immagine,
+    //in caso di errore vengono scritte alcune informazioni sul progetto
     const back = document.createElement("div");
     back.className = "box__face box__face--back";
     const img0 = document.createElement("img");
@@ -38,6 +44,8 @@ function move(images, word){
 
     newBox.appendChild(back);
 
+    //creazione faccia right con la seconda immagine,
+    //in caso di errore visualizza logo SUPSI
     const right = document.createElement("div");
     right.className = "box__face box__face--right";
     const img1 = document.createElement("img");
@@ -51,6 +59,8 @@ function move(images, word){
 
     newBox.appendChild(right);
 
+    //creazione faccia left con la terza immagine,
+    //in caso di errore visualizza logo StartUp Garage
     const left = document.createElement("div");
     left.className = "box__face box__face--left";
     const img2 = document.createElement("img");
@@ -64,6 +74,8 @@ function move(images, word){
 
     newBox.appendChild(left);
 
+    //creazione faccia top con la quarta immagine,
+    //in caso di errore visualizza logo progetto
     const top = document.createElement("div");
     top.className = "box__face box__face--top";
     const img3 = document.createElement("img");
@@ -77,6 +89,8 @@ function move(images, word){
 
     newBox.appendChild(top);
 
+    //creazione faccia bottom con la quinta immagine,
+    //in caso di errore visualizza logo progetto
     const bottom = document.createElement("div");
     bottom.className = "box__face box__face--bottom";
     const img4 = document.createElement("img");
@@ -90,7 +104,9 @@ function move(images, word){
 
     newBox.appendChild(bottom);
 
+    //alla fine dell'animazione viene eliminato il cubo
     newBox.addEventListener("animationend", deleteBox);
+    //aggiunta cubo prima del div end
     const end = document.querySelector(".end");
     parent.insertBefore(newBox,end);
 }
