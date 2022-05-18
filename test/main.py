@@ -220,4 +220,4 @@ def handleMessage(msg):
             emit("response", json.dumps(keyword))
 
 
-socketio.run(app, host="0.0.0.0", port="443", debug=True,ssl_context=('cert.pem','pkey.pem'))
+socketio.run(app, host="0.0.0.0", port="443", debug=True,ssl_context=('C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\cert.pem','C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\pkey.pem'))
