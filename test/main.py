@@ -23,7 +23,7 @@ current_image = 0
 background = "wood.png"
 backgrounds = ["wood.png", "black.png", "white.png"]
 
-//Search keyword
+#Search keyword
 def search(keywords, max_results=None):
     url = 'https://duckduckgo.com/'
     params = {
@@ -77,21 +77,6 @@ def search(keywords, max_results=None):
     for obj in objs:
         data_receive.append(obj["image"])
     return data_receive
-
-
-'''
-r = sr.Recognizer()
-        mic = sr.Microphone()
-        print(sr.Microphone.list_microphone_names())
-        mic = sr.Microphone(device_index=0)
-        with mic as source:
-            audio = r.record(source, duration=5)
-        text_send=""
-        try:
-            text_send = r.recognize_google(audio, language="it-IT")
-        except:
-            text_send = ""
-'''
 
 # inizializzazione delle variabili necessarie per utilizzare le librerie per il filtro
 nlp = spacy.load("it_core_news_lg")
@@ -156,40 +141,40 @@ def keyword_founder(audio_string):
 r = sr.Recognizer()
 mic = sr.Microphone(device_index=1)
 
-//index.html con sfondo
+#index.html con sfondo
 @app.route('/')
 def index():
     global background
     return render_template('index.html', background_value="../static/image_background/" + background)
 
-//pagina settings
+#pagina settings
 @app.route('/settings')
 def settings():
     return render_template('settings.html')
 
-//richiesta per impostare parametri
+#richiesta per impostare parametri
 @app.route('/settings_parameters')
 def settings_parameters():
     global seconds
-    //prendo secondi
+    #prendo secondi
     try:
         seconds = int(request.args.get('seconds'))
     except:
         print("error")
-    //prendo background
+    #prendo background
     background = int(request.args.get('image_background'))
     if 3 > background >= 0:
         background = backgrounds[background]
 
     return render_template('settings.html')
 
-//pagina salvataggio
+#pagina salvataggio
 @app.route('/save')
 def save():
     global all_texts
     return render_template('save.html', data=zip(all_texts, all_images))
 
-//connessione websocket
+#connessione websocket
 @socketio.on('tavolodelleidee')
 def handleMessage(msg):
     global text_global
@@ -197,25 +182,25 @@ def handleMessage(msg):
     global all_images
     global current_image
     while True:
-        //leggo microfono per durata seconds
+        #leggo microfono per durata seconds
         with mic as source:
             try:
                 audio = r.record(source, duration=seconds)
             except:
                 print("ok")
-            //traduco il testo letto dal microfono in stringa
+            #traduco il testo letto dal microfono in stringa
             text_send = ""
             try:
                 text_send = r.recognize_google(audio, language="it-IT")
             except:
                 text_send = ""
             print(text_send)
-            //filtro parole
+            #filtro parole
             keyword = keyword_founder(text_send)
-            //se ho trovato parole
+            #se ho trovato parole
             if len(keyword["all_data"]["word"]) > 0 and len(keyword["all_data"]["link"]) > 0:
                 text_global = keyword["all_data"]["word"][0]
-                //aggiungo alla lista di immagini
+                #aggiungo alla lista di immagini
                 if len(all_texts) < 12:
                     all_texts.append(keyword["all_data"]["word"][0])
                     all_images.append(keyword["all_data"]["link"][0])
@@ -223,8 +208,8 @@ def handleMessage(msg):
                     all_texts[current_image] = keyword["all_data"]["word"][0]
                     all_images[current_image] = keyword["all_data"]["link"][0]
                     current_image = (current_image + 1) % 12
-            //invio json delle immagini e keyword al client
+            #invio json delle immagini e keyword al client
             emit("response", json.dumps(keyword))
 
-//avvio websocket con https
+#avvio websocket con https
 socketio.run(app, host="0.0.0.0", port="443", debug=True,ssl_context=('C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\cert.pem','C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\pkey.pem'))
