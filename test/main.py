@@ -207,7 +207,7 @@ def handleMessage(msg):
         with mic as source:
             try:
                 t = time.localtime()
-                current_time = time.strftime("%H:%M:%S", t)
+                current_time = time.strftime("%m/%d/%Y, %H:%M:%S", t)
                 current_keyword_info["time"] = current_time
                 audio = r.record(source, duration=seconds)
             except:
