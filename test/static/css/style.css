@@ -3,6 +3,26 @@
 --path: path("M 75 75 C 11 13 139 -87 231 11 C 294 88 215 233 -26 170 C -175 123 -212 53 -196 -17 C -175 -99 -17 -140 196 -135 C 263 -132 583 -142 584 55 C 581 310 309 284 62 284 C -22 281 -439 291 -448 23 V -502");
 }
 
+.qrcode {
+  height: 40px;
+  width: 100px;
+  background-color: black;
+  border-radius: 20px 5px;
+  position: absolute;
+}
+
+.vertical-center {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  color: white;
+  text-align: center;
+  font-size: 20px;
+  font-family: Arial;
+}
 
 .scene {
   height: 97vh;

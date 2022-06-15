@@ -1,54 +1,140 @@
-
-
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
-    <meta name="generator" content="Hugo 0.88.1">
-    <title>Save page</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+  <meta name="generator" content="Hugo 0.98.0">
+  <title>Save Page</title>
 
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="canonical" href="https://getbootstrap.com/docs/5.2/examples/album/">
+  <link rel="stylesheet" href="https://getbootstrap.com/docs/5.2/dist/css/bootstrap.min.css" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+  <link rel="manifest" href="https://getbootstrap.com/docs/5.2/assets/img/favicons/manifest.json">
+  <link rel="icon" href="../static/image_logos/logo.png">
+  <meta name="theme-color" content="#712cf9">
 
-    <!-- Bootstrap core CSS -->
 
+  <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
 
-  </head>
-  <body>
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+
+      .b-example-divider {
+        height: 3rem;
+        background-color: rgba(0, 0, 0, .1);
+        border: solid rgba(0, 0, 0, .15);
+        border-width: 1px 0;
+        box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+      }
+
+      .b-example-vr {
+        flex-shrink: 0;
+        width: 1.5rem;
+        height: 100vh;
+      }
+
+      .bi {
+        vertical-align: -.125em;
+        fill: currentColor;
+      }
+
+      .nav-scroller {
+        position: relative;
+        z-index: 2;
+        height: 2.75rem;
+        overflow-y: hidden;
+      }
+
+      .nav-scroller .nav {
+        display: flex;
+        flex-wrap: nowrap;
+        padding-bottom: 1rem;
+        margin-top: -1px;
+        overflow-x: auto;
+        text-align: center;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
+  </style>
+
+</head>
+<body>
 
 <header>
-
+  <div class="navbar shadow" style="background-color: #77a0ff;">
+    <div class="container">
+      <a href="#" class="navbar-brand d-flex align-items-center">
+        <img src="../static/image_logos/logo.png" alt="" height="30" class="d-inline-block align-text-top">
+        Imaginator
+      </a>
+    </div>
+  </div>
 </header>
 
 <main>
 
-  <div id="saveclass">
+  <section class="py-4 text-center container">
+    <div class="row py-lg-1">
+      <div class="col-lg-6 col-md-8 mx-auto">
+        <h1 class="fw-light">Save Page</h1>
+        <p class="lead text-muted">Questa pagina contiene le ultime tot parole chiave </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="album py-5 bg-light">
     <div class="container">
 
-      <div class="row">
-            {% for dat in data %}
-
-        <div class="col-md-4">
-          <figure class="figure">
-            <img src="{{ dat[1] }}" onerror="this.src='../static/image_logos/logo.png';" class="figure-img img-fluid rounded" style="width:400px;height:200px;">
-            <figcaption class="figure-caption">{{ dat[0] }}</figcaption>
-          </figure>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        {% for dat in data %}
+        <div class="col">
+          <div class="card shadow">
+            <img src="{{ dat[1] }}" onerror="this.src='../static/image_logos/logo.png';" class="card-img-top" alt="">
+            <div class="card-body">
+              <h5 class="card-title">{{ dat[0] }}</h5>
+              <!--p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p-->
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                </div>
+                <small class="text-muted">9 mins</small>
+              </div>
+            </div>
+          </div>
         </div>
         {% endfor %}
+
       </div>
 
     </div>
   </div>
+
 </main>
 
-<footer class="text-muted py-5">
+<footer class="text-muted py-4">
+  <div class="container">
+    <p class="float-end mb-1">
+      <a href="#">Torna su</a>
+    </p>
+    <p class="mb-1">Anno scolastico 2021-2022, Bachelor Ingegneria Informatica </p>
+    <p class="mb-1">Prof. Lorenzo Sommaruga - Lavoro di diploma di Natalia Andaloro </p>
+  </div>
 </footer>
 
+<script src="https://getbootstrap.com/docs/5.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-  </body>
 
+</body>
 </html>

@@ -1,20 +1,20 @@
 import json
-import logging
-import re
 import time
 
-import requests
 import spacy
 import speech_recognition as sr
 import yake
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
+from py3pin.Pinterest import Pinterest
 
 app = Flask(__name__)
 
 socketio = SocketIO(app, cors_allowed_origins='*')
 
-logger = logging.getLogger(__name__)
+pinterest = Pinterest(email="startupgarage@supsi.ch", password="pinGarageSG177", username="startupgarage0118")
+# pinterest.login()
+
 
 text_global = ""
 logs_json = {}
@@ -28,59 +28,34 @@ backgrounds = ["wood.png", "white.png", "black.png"]
 
 
 # Search keyword
-def search(keywords):
-    url = 'https://duckduckgo.com/'
-    params = {
-        'q': keywords
+def search(keyword):
+    search_batch = pinterest.search(scope='pins', query=keyword)
+
+    # print(search_batch[0]) il primo è un profilo di pinterest inerente alla parola cercata
+    # print(search_batch[1]["images"]["736x"]["url"]) stampa l'url dell'immagine
+    # print(search_batch[1]["is_promoted"]) True sono le pubblicità, sponsorizzati da ..
+
+    image_url = []
+    image_link = []
+    image_videos = []  # TODO da valutare se toglierlo
+
+    for pins in search_batch:
+        if "images" in pins.keys() and pins["is_promoted"] is False and len(image_url) < 5:
+            image_url.append(pins["images"]["736x"]["url"])
+            image_link.append(pins["link"])
+            if pins["videos"] is not None:
+                image_videos.append(pins["videos"]["video_list"]["V_HLSV4"]["url"])
+
+    data = {
+        "all_data": {
+            "word": keyword,
+            "urls": image_url,
+            "links": image_link,
+            "urls_videos": image_videos
+        }
     }
-
-    #   First make a request to above URL, and parse out the 'vqd'
-    #   This is a special token, which should be used in the subsequent request
-    res = requests.post(url, data=params)
-    search_obj = re.search(r'vqd=([\d-]+)\&', res.text, re.M | re.I)
-
-    if not search_obj:
-        logger.error("Token Parsing Failed !")
-        return -1
-
-    headers = {
-        'authority': 'duckduckgo.com',
-        'accept': 'application/json, text/javascript, */*; q=0.01',
-        'sec-fetch-dest': 'empty',
-        'x-requested-with': 'XMLHttpRequest',
-        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
-        'sec-fetch-site': 'same-origin',
-        'sec-fetch-mode': 'cors',
-        'referer': 'https://duckduckgo.com/',
-        'accept-language': 'en-US,en;q=0.9',
-    }
-
-    params = (
-        ('l', 'us-en'),
-        ('o', 'json'),
-        ('q', keywords),
-        ('vqd', search_obj.group(1)),
-        ('f', ',,,'),
-        ('p', '1'),
-        ('v7exp', 'a'),
-    )
-
-    request_url = url + "i.js"
-
-    data_receive = []
-    while True:
-        try:
-            res = requests.get(request_url, headers=headers, params=params)
-            data = json.loads(res.text)
-            break
-        except ValueError as e:
-            time.sleep(5)
-            continue
-
-    objs = data["results"]
-    for obj in objs:
-        data_receive.append(obj["image"])
-    return data_receive
+    print(data)
+    return data
 
 
 # inizializzazione delle variabili necessarie per utilizzare le librerie per il filtro
@@ -126,21 +101,9 @@ def keyword_founder(audio_string):
             if word.text in keywords:
                 keywords.remove(word.text)
 
-    search_word = []
     if len(keywords) > 0:
-        search_word = search(keywords[0])
-    word_send = ""
-    image_number = 5
-    if len(search_word) >= image_number:
-        for k in search_word[:image_number]:
-            word_send = word_send + k + ","
-    data = {
-        "all_data": {
-            "word": keywords,
-            "link": search_word[:image_number]
-        }
-    }
-    return data
+        return keywords[-1]
+    return []
 
 
 r = sr.Recognizer()
@@ -195,7 +158,7 @@ def log():
 
 # connessione websocket
 @socketio.on('tavolodelleidee')
-def handleMessage(msg):
+def handle_message(msg):
     global text_global
     global all_texts
     global all_images
@@ -205,40 +168,58 @@ def handleMessage(msg):
         current_keyword_info = {}
         # leggo microfono per durata seconds
         with mic as source:
-            try:
-                t = time.localtime()
-                current_time = time.strftime("%m/%d/%Y, %H:%M:%S", t)
-                current_keyword_info["time"] = current_time
-                audio = r.record(source, duration=seconds)
-            except:
-                print("ok")
+            # inserimento nelle info del momento in cui si inizia ad ascoltare il discorso
+            t = time.localtime()
+            current_time = time.strftime("%d/%m/%Y, %H:%M:%S", t)
+            current_keyword_info["time"] = current_time
+            # print(current_time)
+            # TODO trovare il modo di creare un file al giorno di log
+            audio = r.record(source, duration=seconds)
             # traduco il testo letto dal microfono in stringa
             try:
                 text_send = r.recognize_google(audio, language="it-IT")
-            except:
+            except sr.UnknownValueError:  # non si riconosce nessun testo
                 text_send = ""
+            # inserimento nelle info del discorso ascoltato
             current_keyword_info["text"] = text_send
-            # print(text_send)
             # filtro parole
             keyword = keyword_founder(text_send)
             # se ho trovato parole
-            if len(keyword["all_data"]["word"]) > 0 and len(keyword["all_data"]["link"]) > 0:
-                text_global = keyword["all_data"]["word"][0]
-                current_keyword_info["keyword"] = text_global
-                current_keyword_info["images_link"] = keyword["all_data"]["link"]
-                logs_json[i] = current_keyword_info
-                i = i + 1
-                # aggiungo alla lista d'immagini
-                if len(all_texts) < 12:
-                    all_texts.append(keyword["all_data"]["word"][0])
-                    all_images.append(keyword["all_data"]["link"][0])
-                else:
-                    all_texts[current_image] = keyword["all_data"]["word"][0]
-                    all_images[current_image] = keyword["all_data"]["link"][0]
-                    current_image = (current_image + 1) % 12
+            search_result = []
+            if len(keyword) > 0:
+                search_result = search(keyword)
+                # se la ricerca della parola chiave ha trovato risultati
+                if len(search_result["all_data"]["urls"]) > 0:
+                    # salvo le informazioni in una lista
+                    current_keyword_info["keyword"] = keyword
+                    current_keyword_info["images_link"] = search_result["all_data"]["urls"]
+                    current_keyword_info["pages_links"] = search_result["all_data"]["links"]
+                    current_keyword_info["videos"] = search_result["all_data"]["urls_videos"]
+                    logs_json[i] = current_keyword_info
+                    i = i + 1
+                    # aggiungo alla lista d'immagini totale da mettere nella save page
+                    if len(all_texts) < 12:
+                        all_texts.append(keyword)
+                        all_images.append(search_result["all_data"]["urls"][0])
+                    else:
+                        all_texts[current_image] = keyword
+                        all_images[current_image] = search_result["all_data"]["urls"][0]
+                        current_image = (current_image + 1) % 12
             # invio json delle immagini e keyword al client
-            emit("response", json.dumps(keyword))
+            emit("response", json.dumps(search_result))
 
+
+# scrittura in file json delle info del giorno
+t1 = time.localtime()
+current_time1 = time.strftime("%d/%m/%Y", t1)
+time_midnight = time.strptime(current_time1 + ", 17:14:00", "%d/%m/%Y, %H:%M:%S")
+# while t1 != time_midnight:
+# print("è giusto")
+# print("non è giusto")
 
 # avvio websocket con https
 socketio.run(app, host="0.0.0.0", port="443", debug=True, ssl_context=('cert.pem', 'pkey.pem'))
+
+# socketio.run(app, host="0.0.0.0", port="443", debug=True, ssl_context=(
+# 'C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\cert.pem',
+# 'C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\pkey.pem'))
