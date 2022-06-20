@@ -14,7 +14,7 @@ app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins='*')
 
 pinterest = Pinterest(email="startupgarage@supsi.ch", password="pinGarageSG177", username="startupgarage0118")
-pinterest.login()
+# pinterest.login()
 
 
 text_global = ""
