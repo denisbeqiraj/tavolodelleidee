@@ -1,4 +1,5 @@
 import json
+import os.path
 import time
 
 import spacy
@@ -22,6 +23,7 @@ i = 0
 seconds = 10
 all_texts = []
 all_images = []
+all_times = []
 current_image = 0
 background = "wood.png"
 backgrounds = ["wood.png", "white.png", "black.png"]
@@ -54,7 +56,6 @@ def search(keyword):
             "urls_videos": image_videos
         }
     }
-    print(data)
     return data
 
 
@@ -147,7 +148,7 @@ def settings_background():
 @app.route('/save')
 def save():
     global all_texts
-    return render_template('save.html', data=zip(all_texts, all_images))
+    return render_template('save.html', data=zip(all_texts, all_images, all_times))
 
 
 # pagina di log
@@ -163,6 +164,7 @@ def handle_message(msg):
     global all_texts
     global all_images
     global current_image
+    global logs_json
     global i
     while True:
         current_keyword_info = {}
@@ -172,8 +174,17 @@ def handle_message(msg):
             t = time.localtime()
             current_time = time.strftime("%d/%m/%Y, %H:%M:%S", t)
             current_keyword_info["time"] = current_time
-            # print(current_time)
-            # TODO trovare il modo di creare un file al giorno di log
+            current_hour = time.strftime("%H:%M:%S", t)
+
+            # scrittura in file json delle info del giorno
+            y = time.strptime(str(t.tm_mday - 1) + "/" + str(t.tm_mon) + "/" + str(t.tm_year), "%d/%m/%Y")
+            yesterday = time.strftime("%d_%m_%Y", y)
+            name_file = yesterday + ".json"
+            if not os.path.exists('../log/' + name_file):
+                with open("../log/" + name_file, "w") as json_file:
+                    json.dump(logs_json, json_file)
+                logs_json = {}
+
             audio = r.record(source, duration=seconds)
             # traduco il testo letto dal microfono in stringa
             try:
@@ -201,21 +212,15 @@ def handle_message(msg):
                     if len(all_texts) < 12:
                         all_texts.append(keyword)
                         all_images.append(search_result["all_data"]["urls"][0])
+                        all_times.append(current_hour)
                     else:
                         all_texts[current_image] = keyword
                         all_images[current_image] = search_result["all_data"]["urls"][0]
+                        all_times[current_image] = current_hour
                         current_image = (current_image + 1) % 12
             # invio json delle immagini e keyword al client
             emit("response", json.dumps(search_result))
 
-
-# scrittura in file json delle info del giorno
-t1 = time.localtime()
-current_time1 = time.strftime("%d/%m/%Y", t1)
-time_midnight = time.strptime(current_time1 + ", 17:14:00", "%d/%m/%Y, %H:%M:%S")
-# while t1 != time_midnight:
-# print("è giusto")
-# print("non è giusto")
 
 # avvio websocket con https
 socketio.run(app, host="0.0.0.0", port="443", debug=True, ssl_context=('cert.pem', 'pkey.pem'))
