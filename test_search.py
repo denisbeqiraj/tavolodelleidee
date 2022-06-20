@@ -5,6 +5,7 @@ import time
 import logging
 
 logger = logging.getLogger(__name__)
+image_number = 5
 
 
 def search(keywords, max_results=None):
@@ -16,9 +17,9 @@ def search(keywords, max_results=None):
     #   First make a request to above URL, and parse out the 'vqd'
     #   This is a special token, which should be used in the subsequent request
     res = requests.post(url, data=params)
-    searchObj = re.search(r'vqd=([\d-]+)\&', res.text, re.M | re.I)
+    search_obj = re.search(r'vqd=([\d-]+)\&', res.text, re.M | re.I)
 
-    if not searchObj:
+    if not search_obj:
         logger.error("Token Parsing Failed !")
         return -1
 
@@ -38,18 +39,18 @@ def search(keywords, max_results=None):
         ('l', 'us-en'),
         ('o', 'json'),
         ('q', keywords),
-        ('vqd', searchObj.group(1)),
+        ('vqd', search_obj.group(1)),
         ('f', ',,,'),
         ('p', '1'),
         ('v7exp', 'a'),
     )
 
-    requestUrl = url + "i.js"
+    request_url = url + "i.js"
 
     data_receive = []
     while True:
         try:
-            res = requests.get(requestUrl, headers=headers, params=params)
+            res = requests.get(request_url, headers=headers, params=params)
             data = json.loads(res.text)
             break
         except ValueError as e:
@@ -59,4 +60,10 @@ def search(keywords, max_results=None):
     objs = data["results"]
     for obj in objs:
         data_receive.append(obj["image"])
-    return data_receive
+    final_data = {
+        "all_data": {
+            "word": keywords,
+            "urls": data_receive[:image_number]
+        }
+    }
+    return final_data

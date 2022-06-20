@@ -11,7 +11,7 @@
   <link rel="canonical" href="https://getbootstrap.com/docs/5.2/examples/album/">
   <link rel="stylesheet" href="https://getbootstrap.com/docs/5.2/dist/css/bootstrap.min.css" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
   <link rel="manifest" href="https://getbootstrap.com/docs/5.2/assets/img/favicons/manifest.json">
-  <link rel="icon" href="../static/image_logos/logo.png">
+  <link rel="icon" href="../test/static/image_logos/logo.png">
   <meta name="theme-color" content="#712cf9">
 
 
@@ -75,7 +75,7 @@
   <div class="navbar shadow" style="background-color: #77a0ff;">
     <div class="container">
       <a href="#" class="navbar-brand d-flex align-items-center">
-        <img src="../static/image_logos/logo.png" alt="" height="30" class="d-inline-block align-text-top">
+        <img src="../test/static/image_logos/logo.png" alt="" height="30" class="d-inline-block align-text-top">
         Imaginator
       </a>
     </div>
@@ -88,7 +88,7 @@
     <div class="row py-lg-1">
       <div class="col-lg-6 col-md-8 mx-auto">
         <h1 class="fw-light">Save Page</h1>
-        <p class="lead text-muted">Questa pagina contiene le ultime 12 parole chiave intercettate</p>
+        <p class="lead text-muted">Something short and leading about the collection below—its contents, the creator, etc. Make it short and sweet, but not too short so folks don’t simply skip over it entirely.</p>
       </div>
     </div>
   </section>
@@ -100,15 +100,15 @@
         {% for dat in data %}
         <div class="col">
           <div class="card shadow">
-            <img src="{{ dat[1] }}" onerror="this.src='../static/image_logos/logo.png';" class="card-img-top" alt="">
+            <img src="{{ dat[1] }}" onerror="this.src='../test/static/image_logos/logo.png';" class="card-img-top" alt="">
             <div class="card-body">
               <h5 class="card-title">{{ dat[0] }}</h5>
-              <!--p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p-->
+              <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
               <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group">
                   <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
                 </div>
-                <small class="text-muted">{{ dat[2] }}</small>
+                <small class="text-muted">9 mins</small>
               </div>
             </div>
           </div>
@@ -125,10 +125,9 @@
 <footer class="text-muted py-4">
   <div class="container">
     <p class="float-end mb-1">
-      <a href="#">Torna su</a>
+      <a href="#">Back to top</a>
     </p>
-    <p class="mb-1">Anno scolastico 2021-2022, Bachelor Ingegneria Informatica </p>
-    <p class="mb-1">Prof. Lorenzo Sommaruga - Lavoro di diploma di Natalia Andaloro </p>
+    <p class="mb-1">Album example is &copy; Bootstrap, but please download and customize it for yourself!</p>
   </div>
 </footer>
 
