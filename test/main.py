@@ -14,7 +14,7 @@ app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins='*')
 
 pinterest = Pinterest(email="startupgarage@supsi.ch", password="pinGarageSG177", username="startupgarage0118")
-# pinterest.login()
+pinterest.login()
 
 
 text_global = ""
@@ -180,8 +180,8 @@ def handle_message(msg):
             y = time.strptime(str(t.tm_mday - 1) + "/" + str(t.tm_mon) + "/" + str(t.tm_year), "%d/%m/%Y")
             yesterday = time.strftime("%d_%m_%Y", y)
             name_file = yesterday + ".json"
-            if not os.path.exists('../log/' + name_file):
-                with open("../log/" + name_file, "w") as json_file:
+            if not os.path.exists('C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\log\\' + name_file):
+                with open("C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\log\\" + name_file, "w") as json_file:
                     json.dump(logs_json, json_file)
                 logs_json = {}
 
