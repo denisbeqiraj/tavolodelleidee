@@ -61,10 +61,11 @@ def search(keyword):
 
 # inizializzazione delle variabili necessarie per utilizzare le librerie per il filtro
 nlp = spacy.load("it_core_news_lg")
+
 kw_extractor = yake.KeywordExtractor()
 language = "it"
 max_ngram_size = 2  # numero massimo di parole per una parola chiave
-deduplication_threshold = 0.3  # una soglia di duplicazione delle parole nelle parole chiave trovate
+deduplication_threshold = 0.5  # una soglia di duplicazione delle parole nelle parole chiave trovate
 numOfKeywords = 50  # numero massimo di parole chiave trovabili
 custom_kw_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size, dedupLim=deduplication_threshold,
                                             top=numOfKeywords, features=None)
@@ -72,38 +73,57 @@ custom_kw_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size, dedu
 
 def keyword_founder(audio_string):
     keywords_and_score = custom_kw_extractor.extract_keywords(audio_string)
+
     # copia delle parole chiave trovate dalla libreria in una lista
     keywords = []
     for kw in keywords_and_score:
         keywords.append(kw[0])
+    # copia delle parole chiave trovate dalla libreria in un'altra lista
+    keywords2 = []
+    for kw in keywords_and_score:
+        keywords2.append(kw[0])
 
-    # unisce le parole chiave singole in una stringa
-    # e le parole chiave doppie vengono salvate in una lista
-    sentence = ""
-    sentence2 = []
+    doc = nlp(audio_string)
+    # analisi delle parole chiave trovate
     for word in keywords:
-        if " " not in word:
-            sentence += word + " "
+        if " " not in word and "'" not in word:
+            # ci si riferisce alle parole chiave composte da una parola
+            for token in doc:
+                if token.text == word and token.pos_ != "NOUN":
+                    if word in keywords2:
+                        keywords2.remove(word)
         else:
-            sentence2.append(word)
+            # ci si riferisce alle parole chiave composte da due parole
+            single_word = nlp(word)
+            for token in doc:
+                # print(token.text + " " + token.pos_)
+                if token.text == single_word[0].text and \
+                        (token.pos_ == 'VERB' or token.pos_ == 'AUX' or token.pos_ == 'ADV' or token.pos_ == 'SCONJ'):
+                    keywords2.remove(word)
+                    break
+                elif token.text == single_word[1].text and \
+                        (token.pos_ == 'VERB' or token.pos_ == 'AUX' or token.pos_ == 'ADV' or token.pos_ == 'SCONJ'):
+                    keywords2.remove(word)
+                    break
+                elif token.text == single_word[0].text and (token.pos_ == 'DET' or token.pos_ == 'ADP'):
+                    keywords.append(single_word[1].text)
+                    keywords2.append(single_word[1].text)
+                    keywords2.remove(word)
+                    break
 
-    # le parole chiave doppie se contengono verbi vengono eliminate
-    for w in sentence2:
-        doc1 = nlp(w)
-        for w1 in doc1:
-            if w1.pos_ == 'VERB':
-                if w in keywords:
-                    keywords.remove(w)
+    if "stocazzo" in keywords2:
+        keywords2.remove("stocazzo")
+    if "coglioni" in keywords2:
+        keywords2.remove("coglioni")
+    if "ecc" in keywords2:
+        keywords2.remove("ecc")
+    if "fallo" in keywords2:
+        keywords2.remove("fallo")
+    if "falla" in keywords2:
+        keywords2.remove("falla")
 
-    # le parole chiave singole se non sono nomi vengono eliminate
-    doc = nlp(sentence)
-    for word in doc:
-        if word.pos_ != 'NOUN':
-            if word.text in keywords:
-                keywords.remove(word.text)
-
-    if len(keywords) > 0:
-        return keywords[-1]
+    if len(keywords2) > 0:
+        return keywords2[-1]
     return []
 
 
@@ -184,6 +204,7 @@ def handle_message(msg):
                 with open("C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\log\\" + name_file, "w") as json_file:
                     json.dump(logs_json, json_file)
                 logs_json = {}
+
 
             audio = r.record(source, duration=seconds)
             # traduco il testo letto dal microfono in stringa
