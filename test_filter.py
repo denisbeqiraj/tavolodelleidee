@@ -5,12 +5,11 @@ import spacy
 nlp = spacy.load("it_core_news_lg")
 
 kw_extractor = yake.KeywordExtractor()
-audio_string = "Buongiorno! Oggi vi presento la mia famiglia. Io sono il padre, mi chiamo Gennaro Pirlo, " \
-               "ho trentasette anni, e lavoro come scrittore e giornalista da quando ne avevo venti. "
+audio_string = "ecc"
 language = "it"
-max_ngram_size = 2 #numero massimo di parole per una parola chiave
-deduplication_threshold = 0.3 #una soglia di duplicazione delle parole nelle parole chiave trovate
-numOfKeywords = 50 #numero massimo di parole chiave trovabili
+max_ngram_size = 2  # numero massimo di parole per una parola chiave
+deduplication_threshold = 0.5  # una soglia di duplicazione delle parole nelle parole chiave trovate
+numOfKeywords = 50  # numero massimo di parole chiave trovabili
 custom_kw_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size, dedupLim=deduplication_threshold,
                                             top=numOfKeywords, features=None)
 keywords_and_score = custom_kw_extractor.extract_keywords(audio_string)
@@ -20,53 +19,51 @@ keywords = []
 for kw in keywords_and_score:
     keywords.append(kw[0])
 
-#unisce le parole chiave singole in una stringa
-#e le parole chiave doppie vengono salvate in una lista
-sentence = ""
-sentence2 = []
+# copia delle parole chiave trovate dalla libreria in un'altra lista
+keywords2 = []
+for kw in keywords_and_score:
+    keywords2.append(kw[0])
+
+doc = nlp(audio_string)
+
+# analisi delle parole chiave trovate
 for word in keywords:
-    if " " not in word:
-        sentence += word + " "
+    if " " not in word and "'" not in word:
+        # ci si riferisce alle parole chiave composte da una parola
+        for token in doc:
+            if token.text == word and token.pos_ != "NOUN":
+                if word in keywords2:
+                    keywords2.remove(word)
     else:
-        sentence2.append(word)
+        # ci si riferisce alle parole chiave composte da due parole
+        single_word = nlp(word)
+        for token in doc:
+            # print(token.text + " " + token.pos_)
+            if token.text == single_word[0].text and \
+                    (token.pos_ == 'VERB' or token.pos_ == 'AUX' or token.pos_ == 'ADV' or token.pos_ == 'SCONJ'):
+                keywords2.remove(word)
+                break
+            elif token.text == single_word[1].text and \
+                    (token.pos_ == 'VERB' or token.pos_ == 'AUX' or token.pos_ == 'ADV' or token.pos_ == 'SCONJ'):
+                keywords2.remove(word)
+                break
+            elif token.text == single_word[0].text and (token.pos_ == 'DET' or token.pos_ == 'ADP'):
+                keywords.append(single_word[1].text)
+                keywords2.append(single_word[1].text)
+                keywords2.remove(word)
+                break
 
-#le parole chiave doppie se contengono verbi vengono eliminate
-for w in sentence2:
-    doc1 = nlp(w)
-    for w1 in doc1:
-        if w1.pos_ == 'VERB':
-            if w in keywords:
-                keywords.remove(w)
+if "stocazzo" in keywords2:
+    keywords2.remove("stocazzo")
+if "coglioni" in keywords2:
+    keywords2.remove("coglioni")
+if "ecc" in keywords2:
+    keywords2.remove("ecc")
+if "fallo" in keywords2:
+    keywords2.remove("fallo")
+if "falla" in keywords2:
+    keywords2.remove("falla")
 
-#le parole chiave singole se non sono nomi vengono eliminate
-doc = nlp(sentence)
-for word in doc:
-    if word.pos_ != 'NOUN':
-        if word.text in keywords:
-            keywords.remove(word.text)
-
-for kw in keywords:
+for kw in keywords2:
     print(kw)
-'''
-import spacy
-import pke
-
-nlp = spacy.load("it_core_news_lg")
-
-pos = {'NOUN'}
-extractor = pke.unsupervised.TopicRank()
-audio_string = 'Cerchiamo sempre soluzioni innovative per ridurre il nostro impatto ambientale. I nostri negozi, ' \
-               'uffici, data center e centri logistici sono già a impatto zero. Ed entro il 2030 lo saranno anche i ' \
-               'nostri prodotti e il loro utilizzo. '
-extractor.load_document(audio_string, language='it')
-extractor.candidate_selection(pos=pos)
-extractor.candidate_weighting()
-keyphrases = extractor.get_n_best(n=15)
-results = []
-for scored_keywords in keyphrases:
-    for keyword in scored_keywords:
-        if isinstance(keyword, str):
-            results.append(keyword)
-print(results)
-
-'''
+# print(spacy.explain("DET"))

@@ -5,9 +5,10 @@ socket.on('connect', function() {
 });
 //Setup ogni richiesta
 socket.on('response', function(msg) {
+    console.log("è tutto ok");
     //parso il json in input
     const split_word=JSON.parse(msg);
-    //console.log(split_word["all_data"]);
+    console.log(split_word["all_data"]);
     //Se ci sono parole aggiungo
     if(split_word["all_data"]["urls"].length>0){
         move(split_word["all_data"]["urls"], split_word["all_data"]["word"]);
