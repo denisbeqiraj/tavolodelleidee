@@ -1,13 +1,45 @@
 import json
 import os.path
 import time
+import xml.etree.ElementTree as ET
+from enum import Enum
 
+import requests
 import spacy
 import speech_recognition as sr
 import yake
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 from py3pin.Pinterest import Pinterest
+from googletrans import Translator
+
+
+class Language(Enum):
+    ITALIANO = 1
+    ENGLISH = 2
+
+
+# si definisce la lingua iniziale
+lang = Language.ITALIANO
+
+
+def is_english():
+    if lang == Language.ENGLISH:
+        return True
+    return False
+
+
+def vocal_command_control(text):
+    global lang
+    comando_cambiolingua = "cambio lingua inglese"
+    command_changelanguage = "change language italian"
+    if is_english():
+        if text == command_changelanguage:
+            lang = Language.ITALIANO
+    else:
+        if text == comando_cambiolingua:
+            lang = Language.ENGLISH
+
 
 app = Flask(__name__)
 
@@ -58,12 +90,80 @@ def search(keyword):
     }
     return data
 
+translator = Translator()
+
+def search_patent(keyword):
+    if not is_english():
+        result = translator.translate(keyword, src='it', dest='en')
+        keyword = result.text
+
+    # request access token
+    header_access = {
+        'Authorization': 'Basic QVJLOWdVYnVLWUQzaEpsbU9lRmdmRm94cXRNNXRyRkc6S1Q0dHhpc0F3VkpFOUVmOA==',
+        'Content-Type': 'application/x-www-form-urlencoded',
+    }
+    param = {'grant_type': 'client_credentials'}
+
+    url_access = 'https://ops.epo.org/3.2/auth/accesstoken'
+    info = requests.post(url_access, headers=header_access, data=param)
+    data_access = json.loads(info.text)  # data_access['access_token'] is the authorization
+    auth = data_access['access_token']
+
+    # search publication data
+    url = 'http://ops.epo.org/3.2/rest-services/published-data/search?Range=1-5&q=ti%3D' + keyword
+    header = {
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip',
+        'Accept-Language': 'it-IT',
+        'Authorization': 'Bearer ' + auth,
+        'Host': 'ops.epo.org',
+        'sec-ch-ua': 'Chromium";v="104',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': 'Windows',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'cross-site',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML',
+        'X-Forwarded-Port': '443',
+        'X-Forwarded-Proto': 'https',
+    }
+
+    data = requests.get(url, headers=header)
+
+    link_espacenet = []
+
+    root = ET.fromstring(data.text)
+    for elem in root.iter("{http://ops.epo.org}publication-reference"):
+        family_id = elem.attrib["family-id"]
+        country = elem.find("./{http://www.epo.org/exchange}document-id/{http://www.epo.org/exchange}country").text
+        doc_number = elem.find(
+            "./{http://www.epo.org/exchange}document-id/{http://www.epo.org/exchange}doc-number").text
+        kind = elem.find("./{http://www.epo.org/exchange}document-id/{http://www.epo.org/exchange}kind").text
+        doc_id = country + doc_number + kind
+        link = "https://worldwide.espacenet.com/patent/search/family/" + family_id + "/publication/" + doc_id + "?q=" + doc_id
+        # link_espacenet.append(link)
+        doc_id2 = country + doc_number + "." + kind
+        url2 = "http://ops.epo.org/3.2/rest-services/published-data/publication/epodoc/" + doc_id2 + "/biblio"
+        data2 = requests.get(url2, headers=header)
+        root2 = ET.fromstring(data2.text)
+        title = root2.find(
+            "./{http://www.epo.org/exchange}exchange-documents/{http://www.epo.org/exchange}exchange-document/{http://www.epo.org/exchange}bibliographic-data/{http://www.epo.org/exchange}invention-title").text
+        link_and_title = (title, link)
+        link_espacenet.append(link_and_title)
+    return link_espacenet
+
 
 # inizializzazione delle variabili necessarie per utilizzare le librerie per il filtro
-nlp = spacy.load("it_core_news_lg")
+if is_english():
+    nlp = spacy.load("en_core_web_trf")
+else:
+    nlp = spacy.load("it_core_news_lg")
 
 kw_extractor = yake.KeywordExtractor()
-language = "it"
+if is_english():
+    language = "en"
+else:
+    language = "it"
 max_ngram_size = 2  # numero massimo di parole per una parola chiave
 deduplication_threshold = 0.5  # una soglia di duplicazione delle parole nelle parole chiave trovate
 numOfKeywords = 50  # numero massimo di parole chiave trovabili
@@ -111,16 +211,17 @@ def keyword_founder(audio_string):
                     keywords2.remove(word)
                     break
 
-    if "stocazzo" in keywords2:
-        keywords2.remove("stocazzo")
-    if "coglioni" in keywords2:
-        keywords2.remove("coglioni")
-    if "ecc" in keywords2:
-        keywords2.remove("ecc")
-    if "fallo" in keywords2:
-        keywords2.remove("fallo")
-    if "falla" in keywords2:
-        keywords2.remove("falla")
+    if not is_english():
+        if "stocazzo" in keywords2:
+            keywords2.remove("stocazzo")
+        if "coglioni" in keywords2:
+            keywords2.remove("coglioni")
+        if "ecc" in keywords2:
+            keywords2.remove("ecc")
+        if "fallo" in keywords2:
+            keywords2.remove("fallo")
+        if "falla" in keywords2:
+            keywords2.remove("falla")
 
     if len(keywords2) > 0:
         return keywords2[-1]
@@ -205,8 +306,10 @@ def handle_message(msg):
                     json.dump(logs_json, json_file)
                 logs_json = {}
 
-
-            audio = r.record(source, duration=seconds)
+            try:
+                audio = r.record(source, duration=seconds)
+            except:
+                print("ok")
             # traduco il testo letto dal microfono in stringa
             try:
                 text_send = r.recognize_google(audio, language="it-IT")
@@ -214,6 +317,8 @@ def handle_message(msg):
                 text_send = ""
             # inserimento nelle info del discorso ascoltato
             current_keyword_info["text"] = text_send
+            # controllo se ci sono comandi vocali e svolgo i compiti
+            vocal_command_control(text_send)
             # filtro parole
             keyword = keyword_founder(text_send)
             # se ho trovato parole

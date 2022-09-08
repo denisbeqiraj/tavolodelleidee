@@ -5,7 +5,9 @@ import spacy
 nlp = spacy.load("it_core_news_lg")
 
 kw_extractor = yake.KeywordExtractor()
-audio_string = "ecc"
+audio_string = "Viviamo in un piccolo paese di campagna, in una bella casa con un cortile. I nostri tre figli si " \
+               "chiamano Andrea, Martina e Giacomo. Andrea frequenta l'asilo, Martina e Giacomo frequentano le scuole " \
+               "elementari. I miei tre figli amano giocare a tanti giochi diversi nel cortile. "
 language = "it"
 max_ngram_size = 2  # numero massimo di parole per una parola chiave
 deduplication_threshold = 0.5  # una soglia di duplicazione delle parole nelle parole chiave trovate
@@ -63,6 +65,8 @@ if "fallo" in keywords2:
     keywords2.remove("fallo")
 if "falla" in keywords2:
     keywords2.remove("falla")
+if "fammi" in keywords2:
+    keywords2.remove("fammi")
 
 for kw in keywords2:
     print(kw)
