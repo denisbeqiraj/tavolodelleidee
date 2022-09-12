@@ -14,7 +14,7 @@ results = html.select('.gs_r')
 
 for result in results:
     link = result.select('.gs_or_ggsm')
-    if len(link) > 0:
+    if len(link) > 0 and len(link_scholar) <= 5:
         link = re.search('href=\"(.+?)\">', str(link[0].find('a'))).group(1)
         link_scholar.append(link)
 

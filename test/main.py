@@ -175,7 +175,7 @@ def search_scholar(keyword):
 
     for result in results:
         link = result.select('.gs_or_ggsm')
-        if len(link) > 0:
+        if len(link) > 0 and len(link_scholar) <= 5:
             link = re.search('href=\"(.+?)\">', str(link[0].find('a'))).group(1)
             link_scholar.append(link)
 
@@ -229,11 +229,11 @@ def keyword_founder(audio_string):
             for token in doc:
                 # print(token.text + " " + token.pos_)
                 if token.text == single_word[0].text and \
-                        (token.pos_ != 'NOUN' or token.pos_ != 'ADJ'):
+                        (token.pos_ != 'NOUN' and token.pos_ != 'ADJ'):
                     keywords2.remove(word)
                     break
                 elif token.text == single_word[1].text and \
-                        (token.pos_ != 'NOUN' or token.pos_ != 'ADJ'):
+                        (token.pos_ != 'NOUN' and token.pos_ != 'ADJ'):
                     keywords2.remove(word)
                     break
                 elif token.text == single_word[0].text and (token.pos_ == 'DET' or token.pos_ == 'ADP'):
@@ -386,8 +386,8 @@ def handle_message(msg):
                         all_links_scholar[current_image] = search_scholar_result
                         all_times[current_image] = current_hour
                         current_image = (current_image + 1) % 12
-            # invio json delle immagini e keyword al client
-            emit("response", json.dumps(search_result))
+        # invio json delle immagini e keyword al client
+        emit("response", json.dumps(search_result))
 
 
 
