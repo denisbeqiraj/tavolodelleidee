@@ -1,5 +1,6 @@
 import json
 import os.path
+import re
 import time
 import xml.etree.ElementTree as ET
 from enum import Enum
@@ -8,10 +9,13 @@ import requests
 import spacy
 import speech_recognition as sr
 import yake
+from bs4 import BeautifulSoup
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 from py3pin.Pinterest import Pinterest
-from googletrans import Translator
+from translate import Translator
+
+translator = Translator(from_lang="it", to_lang='en')
 
 
 class Language(Enum):
@@ -31,14 +35,16 @@ def is_english():
 
 def vocal_command_control(text):
     global lang
-    comando_cambiolingua = "cambio lingua inglese"
-    command_changelanguage = "change language italian"
+    comando_cambio_lingua = "cambio lingua inglese"
+    command_change_language = "change language italian"
     if is_english():
-        if text == command_changelanguage:
+        if text == command_change_language:
             lang = Language.ITALIANO
+            print("LINGUA: ITALIANO")
     else:
-        if text == comando_cambiolingua:
+        if text == comando_cambio_lingua:
             lang = Language.ENGLISH
+            print("LINGUA: INGLESE")
 
 
 app = Flask(__name__)
@@ -48,7 +54,6 @@ socketio = SocketIO(app, cors_allowed_origins='*')
 pinterest = Pinterest(email="startupgarage@supsi.ch", password="pinGarageSG177", username="startupgarage0118")
 pinterest.login()
 
-
 text_global = ""
 logs_json = {}
 i = 0
@@ -56,6 +61,9 @@ seconds = 10
 all_texts = []
 all_images = []
 all_times = []
+all_links_img = []
+all_links_patent = []
+all_links_scholar = []
 current_image = 0
 background = "wood.png"
 backgrounds = ["wood.png", "white.png", "black.png"]
@@ -76,7 +84,10 @@ def search(keyword):
     for pins in search_batch:
         if "images" in pins.keys() and pins["is_promoted"] is False and len(image_url) < 5:
             image_url.append(pins["images"]["736x"]["url"])
-            image_link.append(pins["link"])
+            if pins["link"] is None:
+                image_link.append("")
+            else:
+                image_link.append(pins["link"])
             if pins["videos"] is not None:
                 image_videos.append(pins["videos"]["video_list"]["V_HLSV4"]["url"])
 
@@ -90,12 +101,11 @@ def search(keyword):
     }
     return data
 
-translator = Translator()
 
 def search_patent(keyword):
-    if not is_english():
-        result = translator.translate(keyword, src='it', dest='en')
-        keyword = result.text
+    if is_english() is False:
+        result = translator.translate(keyword)
+        keyword = result
 
     # request access token
     header_access = {
@@ -147,31 +157,52 @@ def search_patent(keyword):
         data2 = requests.get(url2, headers=header)
         root2 = ET.fromstring(data2.text)
         title = root2.find(
-            "./{http://www.epo.org/exchange}exchange-documents/{http://www.epo.org/exchange}exchange-document/{http://www.epo.org/exchange}bibliographic-data/{http://www.epo.org/exchange}invention-title").text
-        link_and_title = (title, link)
-        link_espacenet.append(link_and_title)
+            "./{http://www.epo.org/exchange}exchange-documents/{http://www.epo.org/exchange}exchange-document/{http://www.epo.org/exchange}bibliographic-data/{http://www.epo.org/exchange}invention-title")
+        if title is not None:
+            link_espacenet.append(title.text)
+            link_espacenet.append(link)
     return link_espacenet
 
 
-# inizializzazione delle variabili necessarie per utilizzare le librerie per il filtro
-if is_english():
-    nlp = spacy.load("en_core_web_trf")
-else:
-    nlp = spacy.load("it_core_news_lg")
+def search_scholar(keyword):
+    url = 'https://scholar.google.com/scholar?hl=it&q=allintitle%3A+' + keyword
+    data = requests.get(url)
 
+    link_scholar = []
+
+    html = BeautifulSoup(data.text, 'html.parser')
+    results = html.select('.gs_r')
+
+    for result in results:
+        link = result.select('.gs_or_ggsm')
+        if len(link) > 0:
+            link = re.search('href=\"(.+?)\">', str(link[0].find('a'))).group(1)
+            link_scholar.append(link)
+
+    return link_scholar
+
+
+# inizializzazione delle variabili necessarie per utilizzare le librerie per il filtro
 kw_extractor = yake.KeywordExtractor()
-if is_english():
-    language = "en"
-else:
-    language = "it"
-max_ngram_size = 2  # numero massimo di parole per una parola chiave
-deduplication_threshold = 0.5  # una soglia di duplicazione delle parole nelle parole chiave trovate
-numOfKeywords = 50  # numero massimo di parole chiave trovabili
-custom_kw_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size, dedupLim=deduplication_threshold,
-                                            top=numOfKeywords, features=None)
+nlp_it = spacy.load("en_core_web_trf")
+nlp_en = spacy.load("it_core_news_lg")
 
 
 def keyword_founder(audio_string):
+    # inizializzazione delle variabili necessarie per utilizzare le librerie per il filtro
+    if is_english():
+        nlp = nlp_en
+    else:
+        nlp = nlp_it
+    if is_english():
+        language = "en"
+    else:
+        language = "it"
+    max_ngram_size = 2  # numero massimo di parole per una parola chiave
+    deduplication_threshold = 0.5  # una soglia di duplicazione delle parole nelle parole chiave trovate
+    numOfKeywords = 50  # numero massimo di parole chiave trovabili
+    custom_kw_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size, dedupLim=deduplication_threshold,
+                                                top=numOfKeywords, features=None)
     keywords_and_score = custom_kw_extractor.extract_keywords(audio_string)
 
     # copia delle parole chiave trovate dalla libreria in una lista
@@ -186,7 +217,8 @@ def keyword_founder(audio_string):
     doc = nlp(audio_string)
     # analisi delle parole chiave trovate
     for word in keywords:
-        if " " not in word and "'" not in word:
+        single_word = nlp(word)
+        if len(single_word) == 1:
             # ci si riferisce alle parole chiave composte da una parola
             for token in doc:
                 if token.text == word and token.pos_ != "NOUN":
@@ -194,15 +226,14 @@ def keyword_founder(audio_string):
                         keywords2.remove(word)
         else:
             # ci si riferisce alle parole chiave composte da due parole
-            single_word = nlp(word)
             for token in doc:
                 # print(token.text + " " + token.pos_)
                 if token.text == single_word[0].text and \
-                        (token.pos_ == 'VERB' or token.pos_ == 'AUX' or token.pos_ == 'ADV' or token.pos_ == 'SCONJ'):
+                        (token.pos_ != 'NOUN' or token.pos_ != 'ADJ'):
                     keywords2.remove(word)
                     break
                 elif token.text == single_word[1].text and \
-                        (token.pos_ == 'VERB' or token.pos_ == 'AUX' or token.pos_ == 'ADV' or token.pos_ == 'SCONJ'):
+                        (token.pos_ != 'NOUN' or token.pos_ != 'ADJ'):
                     keywords2.remove(word)
                     break
                 elif token.text == single_word[0].text and (token.pos_ == 'DET' or token.pos_ == 'ADP'):
@@ -269,7 +300,7 @@ def settings_background():
 @app.route('/save')
 def save():
     global all_texts
-    return render_template('save.html', data=zip(all_texts, all_images, all_times))
+    return render_template('save.html', data=zip(all_texts, all_images, all_links_img, all_links_patent, all_times, all_links_scholar))
 
 
 # pagina di log
@@ -301,30 +332,34 @@ def handle_message(msg):
             y = time.strptime(str(t.tm_mday - 1) + "/" + str(t.tm_mon) + "/" + str(t.tm_year), "%d/%m/%Y")
             yesterday = time.strftime("%d_%m_%Y", y)
             name_file = yesterday + ".json"
-            if not os.path.exists("C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\log\\" + name_file):
-                with open("C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\log\\" + name_file, "w") as json_file:
+            if not os.path.exists("..\\log\\" + name_file):
+                with open("..\\log\\" + name_file, "w") as json_file:
                     json.dump(logs_json, json_file)
                 logs_json = {}
-
             try:
                 audio = r.record(source, duration=seconds)
             except:
                 print("ok")
             # traduco il testo letto dal microfono in stringa
             try:
-                text_send = r.recognize_google(audio, language="it-IT")
-            except sr.UnknownValueError:  # non si riconosce nessun testo
+                if is_english():
+                    text_send = r.recognize_google(audio, language="en-US")
+                else:
+                    text_send = r.recognize_google(audio, language="it-IT")
+            except:  # non si riconosce nessun testo
                 text_send = ""
             # inserimento nelle info del discorso ascoltato
             current_keyword_info["text"] = text_send
             # controllo se ci sono comandi vocali e svolgo i compiti
-            vocal_command_control(text_send)
+            #vocal_command_control(text_send)
             # filtro parole
             keyword = keyword_founder(text_send)
             # se ho trovato parole
             search_result = []
             if len(keyword) > 0:
                 search_result = search(keyword)
+                search_patent_result = search_patent(keyword)
+                search_scholar_result = search_scholar(keyword)
                 # se la ricerca della parola chiave ha trovato risultati
                 if len(search_result["all_data"]["urls"]) > 0:
                     # salvo le informazioni in una lista
@@ -337,20 +372,28 @@ def handle_message(msg):
                     # aggiungo alla lista d'immagini totale da mettere nella save page
                     if len(all_texts) < 12:
                         all_texts.append(keyword)
-                        all_images.append(search_result["all_data"]["urls"][0])
+                        all_images.append(search_result["all_data"]["urls"])
+                        all_links_img.append(search_result["all_data"]["links"])
+                        all_links_patent.append(search_patent_result)
+                        all_links_scholar.append(search_scholar_result)
                         all_times.append(current_hour)
+
                     else:
                         all_texts[current_image] = keyword
-                        all_images[current_image] = search_result["all_data"]["urls"][0]
+                        all_images[current_image] = search_result["all_data"]["urls"]
+                        all_links_img[current_image] = search_result["all_data"]["links"]
+                        all_links_patent[current_image] = search_patent_result
+                        all_links_scholar[current_image] = search_scholar_result
                         all_times[current_image] = current_hour
                         current_image = (current_image + 1) % 12
             # invio json delle immagini e keyword al client
             emit("response", json.dumps(search_result))
 
 
+
 # avvio websocket con https
-socketio.run(app, host="0.0.0.0", port="443", debug=True, ssl_context=('C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\cert.pem','C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\pkey.pem'))
-# socketio.run(app, host="0.0.0.0", port="443", debug=True, ssl_context=('cert.pem', 'pkey.pem'))
+# socketio.run(app, host="0.0.0.0", port="443", debug=True, ssl_context=('C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\cert.pem','C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\pkey.pem'))
+socketio.run(app, host="0.0.0.0", port="443", debug=True, ssl_context=('cert.pem', 'pkey.pem'))
 
 # socketio.run(app, host="0.0.0.0", port="443", debug=True, ssl_context=(
 # 'C:\\Users\\Imaginator\\Downloads\\tavolodelleidee-master\\tavolodelleidee-master\\test\\cert.pem',

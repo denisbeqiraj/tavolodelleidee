@@ -88,7 +88,7 @@
     <div class="row py-lg-1">
       <div class="col-lg-6 col-md-8 mx-auto">
         <h1 class="fw-light">Save Page</h1>
-        <p class="lead text-muted">Questa pagina contiene le ultime 12 parole chiave intercettate</p>
+        <p class="lead text-muted">Questa pagina contiene le ultime 12 parole chiave intercettate della giornata</p>
       </div>
     </div>
   </section>
@@ -100,15 +100,93 @@
         {% for dat in data %}
         <div class="col">
           <div class="card shadow">
-            <img src="{{ dat[1] }}" onerror="this.src='../static/image_logos/logo.png';" class="card-img-top" alt="">
+            <img src="{{ dat[1][0] }}" onerror="this.src='../static/image_logos/logo.png';" class="card-img-top" alt="">
             <div class="card-body">
               <h5 class="card-title">{{ dat[0] }}</h5>
-              <!--p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p-->
               <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#{{ dat[0] }}">
+                    View
+                  </button>
+                  <!-- Modal -->
+                  <div class="modal fade" id="{{ dat[0] }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel">{{ dat[0] }}</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="card-group">
+                            <div class="card">
+                              <a href="{{ dat[2][0] }}" onerror="this.href='';" data-bs-toggle="tooltip" title="Clicca sull'immagine per accedere alla pagina">
+                                <img src="{{ dat[1][0] }}" onerror="this.src='../static/image_logos/logo.png';" class="card-img-top" alt="">
+                              </a>
+                            </div>
+                            <div class="card">
+                              <a href="{{ dat[2][1] }}" data-bs-toggle="tooltip" title="Clicca sull'immagine per accedere alla pagina">
+                                <img src="{{ dat[1][1] }}" onerror="this.src='../static/image_logos/logo.png';" class="card-img-top" alt="">
+                              </a>
+                            </div>
+                            <div class="card">
+                              <a href="{{ dat[2][2] }}" data-bs-toggle="tooltip" title="Clicca sull'immagine per accedere alla pagina">
+                                <img src="{{ dat[1][2] }}" onerror="this.src='../static/image_logos/logo.png';" class="card-img-top" alt="">
+                              </a>
+                            </div>
+                            <div class="card">
+                              <a href="{{ dat[2][3] }}" data-bs-toggle="tooltip" title="Clicca sull'immagine per accedere alla pagina">
+                                <img src="{{ dat[1][3] }}" onerror="this.src='../static/image_logos/logo.png';" class="card-img-top" alt="">
+                              </a>
+                            </div>
+                            <div class="card">
+                              <a href="{{ dat[2][4] }}" data-bs-toggle="tooltip" title="Clicca sull'immagine per accedere alla pagina">
+                                <img src="{{ dat[1][4] }}" onerror="this.src='../static/image_logos/logo.png';" class="card-img-top" alt="">
+                              </a>
+                            </div>
+                          </div>
+                          <hr>
+                          <h6>Link brevetti associati</h6>
+                          <a href="{{ dat[3][1] }}">
+                            {{ dat[3][0] }}
+                          </a>
+                          <a href="{{ dat[3][3] }}">
+                            {{ dat[3][2] }}
+                          </a>
+                          <a href="{{ dat[3][5] }}">
+                            {{ dat[3][4] }}
+                          </a>
+                          <a href="{{ dat[3][7] }}">
+                            {{ dat[3][6] }}
+                          </a>
+                          <a href="{{ dat[3][9] }}">
+                            {{ dat[3][8] }}
+                          </a>
+                          <hr>
+                          <h6>Link a pdf di documenti</h6>
+                          <a href="{{ dat[5][0] }}">
+                            {{ dat[5][0] }}
+                          </a>
+                          <a href="{{ dat[5][1] }}">
+                            {{ dat[5][1] }}
+                          </a>
+                          <a href="{{ dat[5][2] }}">
+                            {{ dat[5][2] }}
+                          </a>
+                          <a href="{{ dat[5][3] }}">
+                            {{ dat[5][3] }}
+                          </a>
+                          <a href="{{ dat[5][4] }}">
+                            {{ dat[5][4] }}
+                          </a>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <small class="text-muted">{{ dat[2] }}</small>
+                <small class="text-muted">{{ dat[4] }}</small>
               </div>
             </div>
           </div>
